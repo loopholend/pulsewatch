@@ -1,0 +1,22 @@
+# Root .gitignore for PulseWatch
+
+# Local agent environments and scratch directories
+.agents/
+scratch/
+
+# IDE configurations
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

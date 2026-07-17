@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: pulsewatch-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pulsewatch
+    username: postgres
+    password: ${DB_PASSWORD:root}
+    hikari:
+      maximum-pool-size: 25
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: 86400000
+  refresh-expiration-ms: 604800000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+spring.jpa.open-in-view: false
+
+spring.mail:
+  host: smtp.mailtrap.io
+  port: 587
+  username: ""
+  password: ""
+  properties.mail.smtp.auth: false
+  properties.mail.smtp.starttls.enable: false
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.pulsewatch.backend: INFO
+
+pulsewatch:
+  incident:
+    failure-threshold: 3
+  scheduler:
+    thread-pool-size: 20
+    interval-ms: 60000
+    timeout-ms: 30000

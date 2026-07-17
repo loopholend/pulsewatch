@@ -1,0 +1,11 @@
+CREATE INDEX IF NOT EXISTS idx_monitors_user_id ON monitors(user_id);
+CREATE INDEX IF NOT EXISTS idx_incidents_monitor_id ON incidents(monitor_id);
+CREATE INDEX IF NOT EXISTS idx_alert_rules_monitor_id ON alert_rules(monitor_id);
+CREATE INDEX IF NOT EXISTS idx_status_pages_user_id ON status_pages(user_id);
+CREATE INDEX IF NOT EXISTS idx_service_status_status_page_id ON service_status(status_page_id);
+CREATE INDEX IF NOT EXISTS idx_service_status_monitor_id ON service_status(monitor_id);
+CREATE INDEX IF NOT EXISTS idx_incident_events_incident_id ON incident_events(incident_id);
+CREATE INDEX IF NOT EXISTS idx_alert_history_monitor_id ON alert_history(monitor_id);
+CREATE INDEX IF NOT EXISTS idx_alert_history_incident_id ON alert_history(incident_id);
+CREATE INDEX IF NOT EXISTS idx_monitor_assertions_monitor_id ON monitor_assertions(monitor_id);
+CREATE INDEX IF NOT EXISTS idx_maintenance_windows_monitor_id ON maintenance_windows(monitor_id);
