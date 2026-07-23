@@ -2,12 +2,12 @@ spring:
   application:
     name: pulsewatch-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/pulsewatch
-    username: postgres
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:pulsewatch}
+    username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:root}
     hikari:
-      maximum-pool-size: 25
-      minimum-idle: 5
+      maximum-pool-size: 10
+      minimum-idle: 2
       idle-timeout: 300000
       connection-timeout: 20000
   jpa:
@@ -35,12 +35,19 @@ springdoc:
 spring.jpa.open-in-view: false
 
 spring.mail:
-  host: smtp.mailtrap.io
-  port: 587
-  username: ""
-  password: ""
-  properties.mail.smtp.auth: false
-  properties.mail.smtp.starttls.enable: false
+  host: ${MAIL_HOST:smtp.mailtrap.io}
+  port: ${MAIL_PORT:587}
+  username: ${MAIL_USERNAME:}
+  password: ${MAIL_PASSWORD:}
+  properties.mail.smtp.auth: true
+  properties.mail.smtp.starttls.enable: true
+
+server:
+  forward-headers-strategy: framework
+  port: 8080
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
 
 logging:
   level:

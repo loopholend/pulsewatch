@@ -25,7 +25,6 @@ import com.pulsewatch.backend.auth.repository.WorkspaceMemberRepository;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.List;
 
 @Component
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
@@ -49,19 +48,29 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             if (apiKey != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 Optional<ApiKey> validatedKey = apiKeyService.validateKey(apiKey);
                 if (validatedKey.isPresent()) {
-                    UUID workspaceId = validatedKey.get().getWorkspaceId();
-                    List<WorkspaceMember> members = workspaceMemberRepository.findByWorkspaceId(workspaceId);
-                    if (!members.isEmpty()) {
-                        WorkspaceMember member = members.get(0);
-                        Optional<User> userOpt = userRepository.findById(member.getUserId());
-                        if (userOpt.isPresent()) {
-                            UserDetails userDetails = UserDetailsImpl.build(userOpt.get(), workspaceId, member.getRole());
-                            UsernamePasswordAuthenticationToken authentication =
-                                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    ApiKey key = validatedKey.get();
+                    UUID workspaceId = key.getWorkspaceId();
+                    UUID creatorUserId = key.getCreatedBy();
 
-                            SecurityContextHolder.getContext().setAuthentication(authentication);
-                        }
+                    if (creatorUserId == null) {
+                        // Legacy key with no createdBy: refuse rather than silently grant OWNER privileges
+                        logger.warn("API key {} has no createdBy - authentication refused to prevent privilege escalation", key.getId());
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+
+                    Optional<User> userOpt = userRepository.findById(creatorUserId);
+                    if (userOpt.isPresent()) {
+                        // Fetch the creator's CURRENT role in this workspace from DB (live, not stored in key)
+                        Optional<WorkspaceMember> memberOpt =
+                                workspaceMemberRepository.findByWorkspaceIdAndUserId(workspaceId, creatorUserId);
+                        String role = memberOpt.map(WorkspaceMember::getRole).orElse("VIEWER");
+
+                        UserDetails userDetails = UserDetailsImpl.build(userOpt.get(), workspaceId, role);
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 }
             }

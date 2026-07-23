@@ -61,7 +61,8 @@ public class AuthController {
                 .map(user -> {
                     java.util.List<com.pulsewatch.backend.auth.entity.WorkspaceMember> memberships = workspaceMemberRepository.findByUserId(user.getId());
                     java.util.UUID activeWorkspaceId = null;
-                    String role = "OWNER";
+                    // Use the user's actual role in their workspace — never hardcode OWNER
+                    String role = "VIEWER";
                     if (!memberships.isEmpty()) {
                         com.pulsewatch.backend.auth.entity.WorkspaceMember primary = memberships.get(0);
                         activeWorkspaceId = primary.getWorkspaceId();

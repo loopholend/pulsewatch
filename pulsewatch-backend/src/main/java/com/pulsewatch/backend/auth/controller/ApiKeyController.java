@@ -39,6 +39,7 @@ public class ApiKeyController {
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         ApiKeyService.GeneratedApiKey generated = apiKeyService.generateKey(
                 userDetails.getWorkspaceId(),
+                userDetails.getId(),
                 request.getName(),
                 request.getDurationDays()
         );

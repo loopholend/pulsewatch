@@ -40,7 +40,7 @@ public class ApiKeyService {
     }
 
     @Transactional
-    public GeneratedApiKey generateKey(UUID workspaceId, String name, int durationDays) {
+    public GeneratedApiKey generateKey(UUID workspaceId, UUID createdBy, String name, int durationDays) {
         // Generate secure 32-byte hex token
         byte[] bytes = new byte[16];
         secureRandom.nextBytes(bytes);
@@ -52,7 +52,7 @@ public class ApiKeyService {
 
         LocalDateTime expiresAt = durationDays > 0 ? LocalDateTime.now().plusDays(durationDays) : null;
 
-        ApiKey apiKey = new ApiKey(workspaceId, name, keyHash, maskedKey, expiresAt);
+        ApiKey apiKey = new ApiKey(workspaceId, createdBy, name, keyHash, maskedKey, expiresAt);
         ApiKey saved = apiKeyRepository.save(apiKey);
 
         return new GeneratedApiKey(saved, rawKey);

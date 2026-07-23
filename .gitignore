@@ -1,10 +1,21 @@
 # Root .gitignore for PulseWatch
 
-# Local agent environments and scratch directories
+# --- SECRETS - NEVER COMMIT ---
+.env
+.env.*
+!.env.example
+
+# --- BUILD OUTPUTS ---
+target/
+dist/
+build/
+node_modules/
+
+# --- LOCAL AGENT / SCRATCH ---
 .agents/
 scratch/
 
-# IDE configurations
+# --- IDE CONFIGURATIONS ---
 .idea/
 .vscode/
 *.suo
@@ -13,10 +24,10 @@ scratch/
 *.sln
 *.sw?
 
-# OS metadata
+# --- OS METADATA ---
 .DS_Store
 Thumbs.db
 
-# Logs
+# --- LOGS ---
 *.log
 logs/

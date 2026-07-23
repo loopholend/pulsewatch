@@ -36,10 +36,15 @@ public class ApiKey {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
+    /** The user who created this API key — used in ApiKeyAuthFilter to authenticate as the correct user with their actual role. */
+    @Column(name = "created_by")
+    private UUID createdBy;
+
     public ApiKey() {}
 
-    public ApiKey(UUID workspaceId, String name, String keyHash, String maskedKey, LocalDateTime expiresAt) {
+    public ApiKey(UUID workspaceId, UUID createdBy, String name, String keyHash, String maskedKey, LocalDateTime expiresAt) {
         this.workspaceId = workspaceId;
+        this.createdBy = createdBy;
         this.name = name;
         this.keyHash = keyHash;
         this.maskedKey = maskedKey;
@@ -69,4 +74,7 @@ public class ApiKey {
 
     public LocalDateTime getExpiresAt() { return expiresAt; }
     public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+
+    public UUID getCreatedBy() { return createdBy; }
+    public void setCreatedBy(UUID createdBy) { this.createdBy = createdBy; }
 }

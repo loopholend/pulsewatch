@@ -1,0 +1,21 @@
+# Node modules (reinstalled inside Docker via npm ci)
+node_modules/
+# Build output (rebuilt inside Docker)
+dist/
+build/
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+# Git history
+.git/
+.gitignore
+# Local environment secrets
+.env
+.env.*
+.env.local
+.env.development.local
+# Logs
+*.log
+logs/

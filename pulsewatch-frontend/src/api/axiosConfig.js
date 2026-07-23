@@ -3,7 +3,9 @@ import axios from 'axios';
 const getAuthToken = () => localStorage.getItem('token');
 
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+    // Use relative path so this works with Vite dev proxy AND Nginx reverse proxy in Docker.
+    // Fallback to the env var for non-proxied setups.
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
 });
 
 // Request interceptor: attach Bearer token to every request
@@ -21,10 +23,11 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            // Clear stale auth data
+            // Clear ALL stale auth data (must match AuthContext.logout())
             localStorage.removeItem('token');
             localStorage.removeItem('userEmail');
             localStorage.removeItem('userRole');
+            localStorage.removeItem('displayName');
             // Only redirect if not already on login/landing page
             const currentPath = window.location.pathname;
             if (currentPath !== '/' && currentPath !== '/login') {

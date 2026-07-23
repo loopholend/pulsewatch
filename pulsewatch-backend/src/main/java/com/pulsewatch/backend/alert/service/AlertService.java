@@ -205,10 +205,6 @@ public class AlertService {
         alertRuleRepository.delete(rule);
     }
 
-    public List<AlertHistory> getAllHistory() {
-        return alertHistoryRepository.findAllByOrderBySentAtDesc();
-    }
-
     public Page<AlertHistory> getHistory(UUID workspaceId, String status, Pageable pageable) {
         return alertHistoryRepository.findByWorkspaceIdAndFilters(workspaceId, status, pageable);
     }

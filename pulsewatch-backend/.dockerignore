@@ -1,0 +1,19 @@
+# Maven build output (rebuilt inside Docker)
+target/
+# IDE and OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+# Git history
+.git/
+.gitignore
+# Local environment secrets
+.env
+.env.*
+# Test files
+src/test/
+# Logs
+*.log
+logs/

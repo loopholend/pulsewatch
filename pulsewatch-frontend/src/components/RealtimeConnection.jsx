@@ -5,7 +5,9 @@ const RealtimeConnection = () => {
     const eventSourceRef = useRef(null);
     const retryTimeoutRef = useRef(null);
 
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+    // Use relative path so SSE flows through Nginx proxy in Docker.
+    // VITE_API_BASE_URL env var can override for non-proxied setups.
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
 
     const connect = useCallback(() => {
         const token = localStorage.getItem('token');
@@ -46,8 +48,8 @@ const RealtimeConnection = () => {
             };
 
             // Custom event listeners
-            es.addEventListener('CONNECTED', (e) => {
-                console.log('SSE connection successfully verified:', e.data);
+            es.addEventListener('CONNECTED', () => {
+                // SSE handshake confirmed — no action needed here
             });
 
             es.addEventListener('MONITOR_UPDATED', (e) => {
