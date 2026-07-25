@@ -24,6 +24,9 @@ public class EmailAlertProvider implements AlertProvider {
     @Value("${spring.mail.username:noreply@pulsewatch.io}")
     private String fromAddress;
 
+    @Value("${app.frontend-url:http://localhost}")
+    private String frontendUrl;
+
     @Override
     public boolean supports(AlertContext context) {
         String recipient = context.getRecipient();
@@ -186,9 +189,10 @@ public class EmailAlertProvider implements AlertProvider {
 
             String actionsSection = String.format(
                 "<div style=\"margin-top: 20px; text-align: center;\">" +
-                "  <a href=\"http://localhost:3000/incidents\" style=\"display: inline-block; background-color: #3b82f6; color: #ffffff; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; margin-right: 10px;\">View Incident Details</a>" +
-                "  <a href=\"http://localhost:3000/monitors/%s\" style=\"display: inline-block; border: 1px solid #d1d5db; color: #374151; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none;\">Monitor Config</a>" +
+                "  <a href=\"%s/incidents\" style=\"display: inline-block; background-color: #3b82f6; color: #ffffff; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; margin-right: 10px;\">View Incident Details</a>" +
+                "  <a href=\"%s/monitors/%s\" style=\"display: inline-block; border: 1px solid #d1d5db; color: #374151; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none;\">Monitor Config</a>" +
                 "</div>",
+                frontendUrl, frontendUrl,
                 context.getMonitorId() != null ? context.getMonitorId().toString() : ""
             );
 
@@ -245,14 +249,14 @@ public class EmailAlertProvider implements AlertProvider {
                 "      <p style=\"font-size: 13px; color: #9ca3af; line-height: 1.5; margin-top: 25px; margin-bottom: 0;\">Log in to your PulseWatch console to review assertions configurations or active incident reports.</p>\n" +
                 "    </div>\n" +
                 "    <div class=\"footer\">\n" +
-                "      Automated alerting system. Manage configurations at <a href=\"http://localhost:3000\">PulseWatch Console</a>.\n" +
+                "      Automated alerting system. Manage configurations at <a href=\"%s\">PulseWatch Console</a>.\n" +
                 "    </div>\n" +
                 "  </div>\n" +
                 "</body>\n" +
                 "</html>",
-                color, titleColor, statusTitle, description, context.getMonitorName(), 
+                color, titleColor, statusTitle, description, context.getMonitorName(),
                 context.getIncidentId() != null ? context.getIncidentId().toString() : "N/A", timeStr,
-                severityColor, context.getSeverity(), durationRow, runbookSection, actionsSection
+                severityColor, context.getSeverity(), durationRow, runbookSection, actionsSection, frontendUrl
             );
         } else {
             // DEFAULT LAYOUT
@@ -315,13 +319,13 @@ public class EmailAlertProvider implements AlertProvider {
                 "      <p style=\"font-size: 13px; color: #9ca3af; line-height: 1.5; margin: 0;\">Log in to your PulseWatch console to review assertions configurations or active incident reports.</p>\n" +
                 "    </div>\n" +
                 "    <div class=\"footer\">\n" +
-                "      Automated alerting system. Manage configurations at <a href=\"http://localhost:3000\">PulseWatch Console</a>.\n" +
+                "      Automated alerting system. Manage configurations at <a href=\"%s\">PulseWatch Console</a>.\n" +
                 "    </div>\n" +
                 "  </div>\n" +
                 "</body>\n" +
                 "</html>",
                 color, titleColor, statusTitle, description, context.getMonitorName(), timeStr,
-                severityColor, context.getSeverity(), durationRow
+                severityColor, context.getSeverity(), durationRow, frontendUrl
             );
         }
     }

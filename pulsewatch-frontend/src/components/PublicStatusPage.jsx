@@ -21,8 +21,8 @@ const PublicStatusPage = () => {
         const fetchPage = async () => {
             setLoading(true);
             try {
-                const baseUrl = import.meta.env.VITE_API_BASE_URL ? import.meta.env.VITE_API_BASE_URL.replace('/api', '') : 'http://localhost:8080';
-                const res = await fetch(`${baseUrl}/public/status/${slug}`);
+                // Use relative URL so request flows through nginx proxy in Docker/Azure
+                const res = await fetch(`/public/status/${slug}`);
                 if (!res.ok) throw new Error('Status page not found');
                 const data = await res.json();
                 setPage(data);

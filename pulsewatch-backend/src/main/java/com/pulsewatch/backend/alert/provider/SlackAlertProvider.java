@@ -2,6 +2,7 @@ package com.pulsewatch.backend.alert.provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -14,7 +15,10 @@ import java.time.Duration;
 public class SlackAlertProvider implements AlertProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(SlackAlertProvider.class);
-    
+
+    @Value("${app.frontend-url:http://localhost}")
+    private String frontendUrl;
+
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -174,7 +178,7 @@ public class SlackAlertProvider implements AlertProvider {
                 "                \"type\": \"plain_text\"," +
                 "                \"text\": \"View Dashboard ↗\"" +
                 "              }," +
-                "              \"url\": \"http://localhost:3000/incidents\"," +
+                "              \"url\": \"%s/incidents\"," +
                 "              \"style\": \"primary\"" +
                 "            }," +
                 "            {" +
@@ -183,7 +187,7 @@ public class SlackAlertProvider implements AlertProvider {
                 "                \"type\": \"plain_text\"," +
                 "                \"text\": \"Configure Monitor\"" +
                 "              }," +
-                "              \"url\": \"http://localhost:3000/monitors/%s\"" +
+                "              \"url\": \"%s/monitors/%s\"" +
                 "            }" +
                 "          ]" +
                 "        }" +
@@ -191,8 +195,9 @@ public class SlackAlertProvider implements AlertProvider {
                 "    }" +
                 "  ]" +
                 "}",
-                color, headerText, messageText, escapeJson(context.getMonitorName()), 
-                escapeJson(context.getSeverity()), incidentId, timeStr, durationField, monitorId
+                color, headerText, messageText, escapeJson(context.getMonitorName()),
+                escapeJson(context.getSeverity()), incidentId, timeStr, durationField,
+                frontendUrl, frontendUrl, monitorId
             );
         } else {
             String durationField = "";
