@@ -44,7 +44,8 @@ public class WebSecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -68,7 +69,9 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth ->
                 auth.requestMatchers(
                         "/api/auth/**",
-                        "/public/**",           // public status pages — no auth required
+                        "/public/**",               // public status pages — no auth required
+                        "/actuator/health",          // Docker / k8s health probes — no auth
+                        "/actuator/health/**",       // liveness + readiness sub-paths
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html"
