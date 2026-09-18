@@ -166,6 +166,18 @@ public class AlertServiceTest {
         assertEquals("test@example.com", savedRule.getNotificationEmail());
         assertEquals(15, savedRule.getCooldownMinutes());
         assertTrue(savedRule.getEnabled());
+
+        // Regression guard: workspace_id must ALWAYS be set — core of this bug fix
+        assertNotNull(savedRule.getWorkspaceId(),
+            "workspaceId must never be null on a persisted AlertRule (workspace migration regression)");
+        assertEquals(workspaceId, savedRule.getWorkspaceId(),
+            "workspaceId must be derived from monitor.getWorkspaceId(), not from another source");
+
+        // Verify the exact object passed to save() also had workspaceId set
+        ArgumentCaptor<AlertRule> captor = ArgumentCaptor.forClass(AlertRule.class);
+        verify(alertRuleRepository).save(captor.capture());
+        assertNotNull(captor.getValue().getWorkspaceId(),
+            "The AlertRule passed to repository.save() must have workspaceId populated");
     }
 
     @Test

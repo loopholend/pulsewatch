@@ -31,3 +31,5 @@ Thumbs.db
 # --- LOGS ---
 *.log
 logs/
+CREDENTIALS.md
+.env

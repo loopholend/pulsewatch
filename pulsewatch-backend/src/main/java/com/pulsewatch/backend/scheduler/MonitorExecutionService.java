@@ -15,15 +15,13 @@ import com.pulsewatch.backend.realtime.service.RealtimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Orchestrates the full execution pipeline for a single monitor check.
@@ -56,7 +54,6 @@ public class MonitorExecutionService {
     @Autowired private AnalyticsService analyticsService;
     @Autowired @Lazy private IncidentService incidentService;
     @Autowired @Lazy private StatusPageService statusPageService;
-    @Autowired private WebClient.Builder webClientBuilder;
     @Autowired private RealtimeService realtimeService;
 
     public void execute(Monitor monitor) {
@@ -131,39 +128,82 @@ public class MonitorExecutionService {
 
     // ── Private: HTTP check ──────────────────────────────────────────────────
 
+    /**
+     * Java 11 HttpClient used for all monitor checks.
+     * <p>
+     * WHY NOT WebClient + .block():
+     * WebClient is built on Reactor Netty and is inherently non-blocking.
+     * When called via .block() from a ScheduledExecutorService thread,
+     * Reactor's .timeout() operator fires on a separate parallel scheduler,
+     * but for certain sites (e.g. google.com, linkedin.com) that use
+     * multi-hop TLS redirect chains, the cancellation signal never propagates
+     * through Netty's internal redirect handler — causing the scheduler thread
+     * to block indefinitely.
+     * <p>
+     * Java 11's HttpClient is synchronous and uses JVM-level interrupt-based
+     * timeouts (.timeout() on the request). Thread.interrupt() always wakes
+     * a parked thread regardless of what Netty's event loop is doing.
+     * This is the correct tool for blocking monitor checks.
+     */
+    private static final java.net.http.HttpClient JAVA_HTTP_CLIENT =
+            java.net.http.HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .followRedirects(java.net.http.HttpClient.Redirect.NORMAL)
+                    .build();
+
     private CheckResult performCheck(Monitor monitor) {
         long start = System.currentTimeMillis();
         CheckResult result = new CheckResult();
 
         try {
-            WebClient client = webClientBuilder.baseUrl(monitor.getUrl()).build();
+            java.net.http.HttpRequest.Builder requestBuilder = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create(monitor.getUrl()))
+                    .timeout(Duration.ofMillis(monitor.getTimeoutMs()))
+                    .method(monitor.getMethod(),
+                            java.net.http.HttpRequest.BodyPublishers.noBody());
 
-            WebClient.RequestHeadersSpec<?> request = client
-                    .method(org.springframework.http.HttpMethod.valueOf(monitor.getMethod()))
-                    .uri("");
-
+            // Apply custom headers configured on the monitor
             Map<String, String> headers = monitor.getHeadersJson();
             if (headers != null) {
-                request = request.headers(h -> headers.forEach(h::add));
+                headers.forEach(requestBuilder::header);
             }
 
-            // Use exchangeToMono to capture body and status without throwing on 4xx/5xx
-            ResponseEntity<String> response = request
-                    .exchangeToMono(resp -> resp.toEntity(String.class))
-                    .timeout(Duration.ofMillis(monitor.getTimeoutMs()))
-                    .block();
+            java.net.http.HttpResponse<String> response =
+                    JAVA_HTTP_CLIENT.send(requestBuilder.build(),
+                            java.net.http.HttpResponse.BodyHandlers.ofString());
 
             result.responseTimeMs = (int) (System.currentTimeMillis() - start);
+            result.statusCode     = response.statusCode();
+            result.body           = truncateBody(response.body());
+            result.httpSuccess    = (result.statusCode == monitor.getExpectedStatus());
 
-            if (response != null) {
-                result.statusCode = response.getStatusCode().value();
-                result.body = truncateBody(response.getBody());
-                result.httpSuccess = (result.statusCode == monitor.getExpectedStatus());
-            }
+        } catch (java.net.http.HttpTimeoutException e) {
+            result.responseTimeMs = (int) (System.currentTimeMillis() - start);
+            result.httpSuccess    = false;
+            result.errorMessage   = "Timeout";
+            logger.warn("Timeout checking monitor {}: {}ms elapsed", monitor.getId(), result.responseTimeMs);
+
+        } catch (java.net.ConnectException e) {
+            result.responseTimeMs = (int) (System.currentTimeMillis() - start);
+            result.httpSuccess    = false;
+            result.errorMessage   = "Connection Refused";
+            logger.error("Error checking monitor {}: {}", monitor.getId(), e.getMessage());
+
+        } catch (java.net.UnknownHostException e) {
+            result.responseTimeMs = (int) (System.currentTimeMillis() - start);
+            result.httpSuccess    = false;
+            result.errorMessage   = "DNS Failure";
+            logger.error("Error checking monitor {}: {}", monitor.getId(), e.getMessage());
+
+        } catch (javax.net.ssl.SSLException e) {
+            result.responseTimeMs = (int) (System.currentTimeMillis() - start);
+            result.httpSuccess    = false;
+            result.errorMessage   = "SSL Error";
+            logger.error("Error checking monitor {}: {}", monitor.getId(), e.getMessage());
 
         } catch (Exception e) {
             result.responseTimeMs = (int) (System.currentTimeMillis() - start);
-            result.httpSuccess = false;
+            result.httpSuccess    = false;
             String msg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
             if (msg.toLowerCase().contains("connection refused")) {
                 result.errorMessage = "Connection Refused";
@@ -171,10 +211,11 @@ public class MonitorExecutionService {
                 result.errorMessage = "Timeout";
             } else if (msg.toLowerCase().contains("unknownhost") || msg.toLowerCase().contains("unknown host")) {
                 result.errorMessage = "DNS Failure";
-            } else if (msg.toLowerCase().contains("ssl") || msg.toLowerCase().contains("handshake") || msg.toLowerCase().contains("cert")) {
+            } else if (msg.toLowerCase().contains("ssl") || msg.toLowerCase().contains("handshake")
+                    || msg.toLowerCase().contains("cert")) {
                 result.errorMessage = "SSL Error";
             } else {
-                result.errorMessage = msg;
+                result.errorMessage = msg.length() > 200 ? msg.substring(0, 200) : msg;
             }
             logger.error("Error checking monitor {}: {}", monitor.getId(), e.getMessage());
         }

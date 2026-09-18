@@ -54,6 +54,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<WelcomePage />} />
                 <Route path="/login" element={<Login onLoginSuccess={(token) => { login(token); navigate('/'); }} />} />
+                <Route path="/oauth2/callback/github" element={<Login onLoginSuccess={(token) => { login(token); navigate('/'); }} />} />
                 <Route path="/help" element={<HelpPage />} />
                 <Route path="*" element={<WelcomePage />} />
             </Routes>
@@ -61,7 +62,7 @@ function App() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+        <div className="h-screen overflow-hidden bg-gray-50 flex flex-col md:flex-row">
             {/* Sidebar Navigation */}
             <aside className="w-full md:w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col justify-between border-r border-slate-800">
                 <div>

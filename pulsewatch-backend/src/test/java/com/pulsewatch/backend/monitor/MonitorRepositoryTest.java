@@ -9,6 +9,7 @@ import com.pulsewatch.backend.auth.repository.WorkspaceRepository;
 import com.pulsewatch.backend.monitor.entity.Monitor;
 import com.pulsewatch.backend.monitor.repository.MonitorRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Verifies workspace-scoped monitor retrieval after the V11 workspace migration.
  * Previously this test used userId-scoped methods (findByUserId, countByUserId)
  * which no longer exist. Rewritten to use workspaceId-scoped equivalents.
+ *
+ * Requires a live PostgreSQL database. Run with: DB_INTEGRATION_TESTS=true ./mvnw test
  */
 @SpringBootTest
 @Transactional
+@DisabledIfEnvironmentVariable(named = "DB_INTEGRATION_TESTS", matches = "(?!true).*",
+    disabledReason = "Requires DB_INTEGRATION_TESTS=true env var and a live PostgreSQL database")
 public class MonitorRepositoryTest {
 
     @Autowired private MonitorRepository monitorRepository;

@@ -15,6 +15,14 @@ public class AlertRule {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * The workspace this alert rule belongs to.
+     * Derived from the monitor's workspace at creation time.
+     * Invariant: alertRule.workspaceId == monitor.workspaceId (enforced in AlertService).
+     */
+    @Column(name = "workspace_id", nullable = false)
+    private UUID workspaceId;
+
     @Column(name = "monitor_id", nullable = false)
     private UUID monitorId;
 
@@ -53,6 +61,8 @@ public class AlertRule {
     public AlertRule() {}
 
     public UUID getId() { return id; }
+    public UUID getWorkspaceId() { return workspaceId; }
+    public void setWorkspaceId(UUID workspaceId) { this.workspaceId = workspaceId; }
     public UUID getMonitorId() { return monitorId; }
     public void setMonitorId(UUID monitorId) { this.monitorId = monitorId; }
     public String getRuleType() { return ruleType; }

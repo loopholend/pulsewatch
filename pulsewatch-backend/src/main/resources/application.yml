@@ -43,7 +43,7 @@ spring.jpa.open-in-view: false
 # Mail: OPTIONAL - leave username/password empty to disable email delivery
 # When credentials are empty, auth and starttls are disabled automatically
 spring.mail:
-  host: ${MAIL_HOST:smtp.mailtrap.io}
+  host: ${MAIL_HOST:smtp.gmail.com}
   port: ${MAIL_PORT:587}
   username: ${MAIL_USERNAME:}
   password: ${MAIL_PASSWORD:}
@@ -56,6 +56,11 @@ spring.mail:
         connectiontimeout: 5000
         timeout: 5000
         writetimeout: 5000
+
+github:
+  client-id: ${GITHUB_CLIENT_ID:}
+  client-secret: ${GITHUB_CLIENT_SECRET:}
+  redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost/oauth2/callback/github}
 
 server:
   forward-headers-strategy: framework

@@ -85,10 +85,16 @@ public class MonitorScheduler {
      * Cancels any existing task for this monitor ID before creating a new one.
      * Safe to call multiple times for the same monitor (idempotent cancel + schedule).
      *
+     * <p>Uses a fixed 5-second initial delay (rather than 0) when scheduling newly-created
+     * monitors via the API. This prevents a race condition where the first check fires
+     * before the calling {@code @Transactional} context has committed the new monitor row,
+     * causing {@link #runCheck} to see an empty {@code findById} result and silently
+     * cancel the task forever.</p>
+     *
      * @param monitor the monitor to schedule; must be active and non-null
      */
     public void scheduleMonitor(Monitor monitor) {
-        scheduleMonitor(monitor, 0L);
+        scheduleMonitor(monitor, 5L);
     }
 
     /**
@@ -135,8 +141,15 @@ public class MonitorScheduler {
     private void runCheck(UUID monitorId) {
         try {
             Monitor monitor = monitorRepository.findById(monitorId).orElse(null);
-            if (monitor == null || !monitor.isActive()) {
-                // Monitor was soft-deleted or deactivated between checks; clean up.
+            if (monitor == null) {
+                // This should not happen under normal operation. Log a warning rather
+                // than silently cancelling — the task will retry on the next interval.
+                logger.warn("Monitor {} not found in DB during scheduled check — skipping this cycle (task remains scheduled)", monitorId);
+                return;
+            }
+            if (!monitor.isActive()) {
+                // Monitor was paused or soft-deleted between checks; clean up.
+                logger.info("Monitor {} is no longer active — unscheduling", monitorId);
                 unscheduleMonitor(monitorId);
                 return;
             }

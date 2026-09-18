@@ -119,8 +119,8 @@ const Step1Target = ({ form, setForm, onNext, onClose }) => {
     };
 
     return (
-        <form onSubmit={handleNext} className="flex flex-col flex-1">
-            <div className="flex-1 p-6 space-y-5 overflow-y-auto">
+        <form onSubmit={handleNext} className="flex flex-col flex-1 min-h-0">
+        <div className="flex-1 p-6 space-y-5 overflow-y-auto min-h-0">
                 <div className="text-center space-y-1 pb-1">
                     <div className="w-12 h-12 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                         <Globe className="w-6 h-6 text-blue-600" />
@@ -215,8 +215,8 @@ const Step2Configure = ({ form, setForm, onNext, onBack }) => {
     const maxTimeout = Math.min(30000, form.intervalSeconds * 1000 - 1000);
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1">
-            <div className="flex-1 p-6 space-y-5 overflow-y-auto">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+        <div className="flex-1 p-6 space-y-5 overflow-y-auto min-h-0">
                 <div className="text-center space-y-1 pb-1">
                     <div className="w-12 h-12 bg-purple-50 border border-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                         <Zap className="w-6 h-6 text-purple-600" />
@@ -336,8 +336,8 @@ const Step3Validate = ({ assertions, setAssertions, onNext, onBack }) => {
     };
 
     return (
-        <div className="flex flex-col flex-1">
-            <div className="flex-1 p-6 space-y-5 overflow-y-auto">
+        <div className="flex flex-col flex-1 min-h-0">
+        <div className="flex-1 p-6 space-y-5 overflow-y-auto min-h-0">
                 <div className="text-center space-y-1 pb-1">
                     <div className="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                         <ShieldCheck className="w-6 h-6 text-emerald-600" />
@@ -472,8 +472,8 @@ const Step4Review = ({ form, assertions, onBack, onClose, onSuccess }) => {
     };
 
     return (
-        <div className="flex flex-col flex-1">
-            <div className="flex-1 p-6 space-y-5 overflow-y-auto">
+        <div className="flex flex-col flex-1 min-h-0">
+        <div className="flex-1 p-6 space-y-5 overflow-y-auto min-h-0">
                 <div className="text-center space-y-1 pb-1">
                     <div className="w-12 h-12 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                         <CheckCircle2 className="w-6 h-6 text-blue-600" />

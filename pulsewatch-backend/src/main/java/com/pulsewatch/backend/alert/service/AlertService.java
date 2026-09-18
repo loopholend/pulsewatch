@@ -144,6 +144,7 @@ public class AlertService {
                 .orElseThrow(() -> new ResourceNotFoundException("Monitor not found in active workspace"));
 
         AlertRule rule = new AlertRule();
+        rule.setWorkspaceId(monitor.getWorkspaceId()); // ← FIX: derive from monitor, not user JWT
         rule.setMonitorId(request.getMonitorId());
         rule.setRuleType(request.getRuleType());
         rule.setNotificationEmail(request.getNotificationEmail());
@@ -153,6 +154,7 @@ public class AlertService {
         rule.setCustomBody(request.getCustomBody());
         rule.setEnabled(true);
         return alertRuleRepository.save(rule);
+
     }
 
     @Transactional
