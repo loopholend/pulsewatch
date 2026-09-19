@@ -17,7 +17,7 @@ ALTER TABLE alert_rules ALTER COLUMN rule_type SET NOT NULL;
 
 -- Create incident_events (new in Phase 4)
 CREATE TABLE IF NOT EXISTS incident_events (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     incident_id UUID NOT NULL,
     event_type VARCHAR(50) NOT NULL,
     message TEXT,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS incident_events (
 
 -- Create alert_history (new in Phase 4)
 CREATE TABLE IF NOT EXISTS alert_history (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     incident_id UUID,
     monitor_id UUID NOT NULL,
     alert_type VARCHAR(50) NOT NULL,

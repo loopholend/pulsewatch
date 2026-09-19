@@ -1,5 +1,5 @@
 CREATE TABLE monitor_drafts (
-    id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     monitor_id        UUID NOT NULL REFERENCES monitors(id) ON DELETE CASCADE,
     workspace_id      UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
     name              VARCHAR(255) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE monitor_drafts (
 );
 
 CREATE TABLE monitor_timeline_events (
-    id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     monitor_id    UUID NOT NULL REFERENCES monitors(id) ON DELETE CASCADE,
     workspace_id  UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
     event_type    VARCHAR(50) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE monitor_timeline_events (
 );
 
 CREATE TABLE workspace_activities (
-    id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     workspace_id  UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
     triggered_by  UUID NOT NULL REFERENCES users(id),
     action_type   VARCHAR(50) NOT NULL,

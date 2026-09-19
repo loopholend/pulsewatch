@@ -1,12 +1,12 @@
 CREATE TABLE workspaces (
-    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name       VARCHAR(255) NOT NULL,
     slug       VARCHAR(255) NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE workspace_members (
-    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
     user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     role         VARCHAR(50) NOT NULL,
@@ -18,7 +18,7 @@ CREATE INDEX idx_member_workspace_id ON workspace_members(workspace_id);
 
 INSERT INTO workspaces (id, name, slug)
 SELECT 
-    uuid_generate_v4(), 
+    gen_random_uuid(), 
     CONCAT(email, '''s Personal Workspace'), 
     REPLACE(REPLACE(email, '@', '-'), '.', '-')
 FROM users;

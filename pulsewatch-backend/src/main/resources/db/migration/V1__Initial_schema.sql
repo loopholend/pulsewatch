@@ -1,7 +1,6 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL,
@@ -10,7 +9,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE refresh_tokens (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     token VARCHAR(255) NOT NULL UNIQUE,
     expires_at TIMESTAMP NOT NULL,
@@ -18,7 +17,7 @@ CREATE TABLE refresh_tokens (
 );
 
 CREATE TABLE monitors (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     url VARCHAR(2048) NOT NULL,
@@ -37,7 +36,7 @@ CREATE TABLE monitors (
 );
 
 CREATE TABLE monitor_results (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     monitor_id UUID NOT NULL REFERENCES monitors(id) ON DELETE CASCADE,
     status_code INT,
     response_time_ms INT,
@@ -59,7 +58,7 @@ CREATE TABLE monitor_stats (
 );
 
 CREATE TABLE incidents (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     monitor_id UUID NOT NULL REFERENCES monitors(id) ON DELETE CASCADE,
     severity VARCHAR(50) NOT NULL, -- LOW, MEDIUM, HIGH, CRITICAL
     started_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -70,7 +69,7 @@ CREATE TABLE incidents (
 );
 
 CREATE TABLE alert_rules (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     monitor_id UUID NOT NULL REFERENCES monitors(id) ON DELETE CASCADE,
     rule_type VARCHAR(50) NOT NULL,
     threshold INT,
@@ -81,7 +80,7 @@ CREATE TABLE alert_rules (
 );
 
 CREATE TABLE status_pages (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     slug VARCHAR(255) NOT NULL UNIQUE,
     title VARCHAR(255) NOT NULL,
@@ -90,7 +89,7 @@ CREATE TABLE status_pages (
 );
 
 CREATE TABLE service_status (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     status_page_id UUID NOT NULL REFERENCES status_pages(id) ON DELETE CASCADE,
     monitor_id UUID NOT NULL REFERENCES monitors(id) ON DELETE CASCADE,
     current_status VARCHAR(50) NOT NULL,
@@ -98,7 +97,7 @@ CREATE TABLE service_status (
 );
 
 CREATE TABLE audit_logs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
     action VARCHAR(255) NOT NULL,
     resource_type VARCHAR(255) NOT NULL,
