@@ -142,7 +142,7 @@ BEGIN
     IF v_has_recipient AND v_has_name AND NOT v_has_notification_email THEN
         EXECUTE '
             INSERT INTO alert_rules (id, monitor_id, workspace_id, name, alert_type, recipient, severity, enabled, created_at, updated_at)
-            SELECT gen_random_uuid(), m.id, m.workspace_id, ''Email Alert - '' || m.name, ''EMAIL'', ''pranjalpal05@gmail.com'', ''CRITICAL'', TRUE, NOW(), NOW()
+            SELECT gen_random_uuid(), m.id, m.workspace_id, ''Email Alert - '' || m.name, ''EMAIL'', ''alerts@pulsewatch.dev'', ''CRITICAL'', TRUE, NOW(), NOW()
             FROM monitors m
             WHERE m.workspace_id = ''22222222-2222-2222-2222-222222222222''::uuid
             AND NOT EXISTS (SELECT 1 FROM alert_rules ar WHERE ar.monitor_id = m.id);
@@ -150,7 +150,7 @@ BEGIN
     ELSIF v_has_notification_email THEN
         EXECUTE '
             INSERT INTO alert_rules (id, monitor_id, workspace_id, rule_type, notification_email, cooldown_minutes, enabled, layout_type, created_at, updated_at)
-            SELECT gen_random_uuid(), m.id, m.workspace_id, ''INCIDENT_OPENED'', ''pranjalpal05@gmail.com'', 30, TRUE, ''DEFAULT'', NOW(), NOW()
+            SELECT gen_random_uuid(), m.id, m.workspace_id, ''INCIDENT_OPENED'', ''alerts@pulsewatch.dev'', 30, TRUE, ''DEFAULT'', NOW(), NOW()
             FROM monitors m
             WHERE m.workspace_id = ''22222222-2222-2222-2222-222222222222''::uuid
             AND NOT EXISTS (SELECT 1 FROM alert_rules ar WHERE ar.monitor_id = m.id);
